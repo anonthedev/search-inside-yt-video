@@ -54,6 +54,9 @@ document.addEventListener("DOMContentLoaded", () => {
             dataFromBackend[index + 1],
           ]);
           console.log(textCombo);
+        } else {
+          searchBtnEl.textContent = "Search";
+          searchBtnEl.disabled = false;
         }
       }
     } else {
@@ -64,6 +67,9 @@ document.addEventListener("DOMContentLoaded", () => {
             .includes(searchInputEl.value.toLowerCase())
         ) {
           filteredArr.push([transcript]);
+        } else {
+          searchBtnEl.textContent = "Search";
+          searchBtnEl.disabled = false;
         }
       });
     }
@@ -84,7 +90,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const pText = document.createElement("p");
       pText.setAttribute("id", "p-text");
-      pText.innerHTML = result.length > 1 ? `${result[0].text + " " + result[1].text}` : result[0].text;
+      pText.innerHTML =
+        result.length > 1
+          ? `${result[0].text + " " + result[1].text}`
+          : result[0].text;
 
       const div = document.createElement("div");
       div.setAttribute("id", "groupDiv");
