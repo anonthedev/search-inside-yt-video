@@ -5,10 +5,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let searchInputEl = document.getElementById("searchInput");
   let formEl = document.getElementById("form");
 
-    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
-      let url = tabs[0].url;
-      videoInputEl.value = url;
-    });
+    // chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+    //   let url = tabs[0].url;
+    //   videoInputEl.value = url;
+    // });
 
   function formatTime(timeInSeconds) {
     const hours = Math.floor(timeInSeconds / 3600);
@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     searchBtnEl.innerHTML = "Searching...";
     searchBtnEl.disabled = true;
     fetch(
-      `http://localhost:5000/transcript?video_url=${encodeURIComponent(
+      `https://search-inside-yt-video.vercel.app/transcript?video_url=${encodeURIComponent(
         videoInputEl.value
       )}`
     )
