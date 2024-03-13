@@ -4,18 +4,22 @@ document.addEventListener("DOMContentLoaded", () => {
   let videoInputEl = document.getElementById("inputVideoUrl");
   let searchInputEl = document.getElementById("searchInput");
   let formEl = document.getElementById("form");
+  const DEV_URL = "http://localhost:5000";
+  const PROD_URL = "https://search-inside-yt-video-production.up.railway.app";
 
-    // chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
-    //   let url = tabs[0].url;
-    //   videoInputEl.value = url;
-    // });
+  // chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+  //   let url = tabs[0].url;
+  //   videoInputEl.value = url;
+  // });
 
   function formatTime(timeInSeconds) {
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
     const seconds = (timeInSeconds % 3600) % 60;
 
-    return `${hours ? hours + "h:" : ""}${minutes ? minutes + "min : " : ""}${seconds + "sec"}`;
+    return `${hours ? hours + "h : " : ""}${minutes ? minutes + "min : " : ""}${
+      seconds + "sec"
+    }`;
   }
 
   function extractVideoId(url) {
@@ -36,16 +40,33 @@ document.addEventListener("DOMContentLoaded", () => {
   function search(dataFromBackend) {
     let filteredArr = [];
     dataContainerEl.innerHTML = "";
-    dataFromBackend.map((transcript) => {
-      if (
-        transcript.text
-          .toLowerCase()
-          .includes(searchInputEl.value.toLowerCase())
-      ) {
-        filteredArr.push(transcript);
-        console.log(transcript.text);
+    if (searchInputEl.value.split(" ").length > 1) {
+      for (let index = 0; index < dataFromBackend.length - 1; index++) {
+        const textCombo = `${dataFromBackend[index].text} ${
+          dataFromBackend[index + 1].text
+        }`;
+        // console.log(textCombo)
+        if (
+          textCombo.toLowerCase().includes(searchInputEl.value.toLowerCase())
+        ) {
+          filteredArr.push([
+            dataFromBackend[index],
+            dataFromBackend[index + 1],
+          ]);
+          console.log(textCombo);
+        }
       }
-    });
+    } else {
+      dataFromBackend.forEach((transcript) => {
+        if (
+          transcript.text
+            .toLowerCase()
+            .includes(searchInputEl.value.toLowerCase())
+        ) {
+          filteredArr.push([transcript]);
+        }
+      });
+    }
     filteredArr.map((result) => {
       const videoId = extractVideoId(videoInputEl.value);
 
@@ -55,15 +76,15 @@ document.addEventListener("DOMContentLoaded", () => {
         "https://youtube.com/watch?v=" +
         videoId +
         "&t=" +
-        Math.floor(result.start) +
+        Math.floor(result[0].start) +
         "s"
       }`;
       pStartTime.target = "_blank";
-      pStartTime.innerHTML = formatTime(Math.floor(result.start))
+      pStartTime.innerHTML = formatTime(Math.floor(result[0].start));
 
       const pText = document.createElement("p");
       pText.setAttribute("id", "p-text");
-      pText.innerHTML = result.text;
+      pText.innerHTML = result.length > 1 ? `${result[0].text + " " + result[1].text}` : result[0].text;
 
       const div = document.createElement("div");
       div.setAttribute("id", "groupDiv");
@@ -81,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
     searchBtnEl.innerHTML = "Searching...";
     searchBtnEl.disabled = true;
     fetch(
-      `https://search-inside-yt-video.vercel.app/transcript?video_url=${encodeURIComponent(
+      `${DEV_URL}/transcript?video_url=${encodeURIComponent(
         videoInputEl.value
       )}`
     )
@@ -89,6 +110,10 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((resp) => {
         search(resp);
       })
-      .catch((error) => console.error("Error fetching data:", error));
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        searchBtnEl.innerHTML = "Search";
+        searchBtnEl.disabled = false;
+      });
   }
 });
